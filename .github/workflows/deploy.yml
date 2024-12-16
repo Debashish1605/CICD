@@ -16,21 +16,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Set WAR_FILE variable to the WAR file found in the repository
+      # Step 2: Set WAR file variable and debug
       - name: Set WAR file variable
         run: |
-          export WAR_FILE=$(find . -name '*.war' | head -n 1)
-          echo "WAR file is: $WAR_FILE"
-        id: set_war_file
+          echo "Listing files in the current directory:"
+          ls -al
+          WAR_FILE=$(find . -name 'sample.war' | head -n 1)
+          echo "WAR file found: $WAR_FILE"
+          echo "WAR_FILE=$WAR_FILE" >> $GITHUB_ENV
 
-      # Step 3: Check if a WAR file is found
-      - name: Check for WAR file
+      # Step 3: Check if WAR file is found
+      - name: Check if WAR file exists
         run: |
           if [ -z "$WAR_FILE" ]; then
             echo "No WAR file found. Exiting."
             exit 1
-          else
-            echo "Found WAR file: $WAR_FILE"
           fi
 
       # Step 4: Set up SSH connection
@@ -39,7 +39,7 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.AWS_SSH_KEY }}
 
-      # Step 5: Deploy WAR file to Tomcat
+      # Step 5: Deploy WAR to Tomcat
       - name: Deploy WAR to Tomcat
         run: |
           echo "Deploying WAR file: $WAR_FILE"
