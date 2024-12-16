@@ -16,24 +16,30 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Check for WAR file
+      # Step 2: Set WAR_FILE variable to the WAR file found in the repository
+      - name: Set WAR file variable
+        run: |
+          export WAR_FILE=$(find . -name '*.war' | head -n 1)
+          echo "WAR file is: $WAR_FILE"
+        id: set_war_file
+
+      # Step 3: Check if a WAR file is found
       - name: Check for WAR file
         run: |
-          WAR_FILE=$(find . -name '*.war' -print -quit)
           if [ -z "$WAR_FILE" ]; then
             echo "No WAR file found. Exiting."
             exit 1
           else
-            echo "WAR file found: $WAR_FILE"
+            echo "Found WAR file: $WAR_FILE"
           fi
 
-      # Step 3: Set up SSH connection
+      # Step 4: Set up SSH connection
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ secrets.AWS_SSH_KEY }}
 
-      # Step 4: Deploy WAR to Tomcat
+      # Step 5: Deploy WAR file to Tomcat
       - name: Deploy WAR to Tomcat
         run: |
           echo "Deploying WAR file: $WAR_FILE"
