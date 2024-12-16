@@ -22,14 +22,18 @@ jobs:
           echo "Listing directory contents:"
           ls -alh
 
-      # Step 3: Set WAR_FILE variable to the WAR file found in the repository
+      # Step 3: Set WAR_FILE environment variable to the WAR file found in the repository
       - name: Set WAR file variable
         run: |
           export WAR_FILE=$(find . -name '*.war' | head -n 1)
           echo "WAR file is: $WAR_FILE"
         id: set_war_file
 
-      # Step 4: Check if a WAR file is found
+      # Step 4: Make WAR_FILE available to subsequent steps
+      - name: Set WAR_FILE as an output for later steps
+        run: echo "WAR_FILE=${{ steps.set_war_file.outputs.WAR_FILE }}" >> $GITHUB_ENV
+
+      # Step 5: Check if a WAR file is found
       - name: Check for WAR file
         run: |
           if [ -z "$WAR_FILE" ]; then
@@ -39,13 +43,13 @@ jobs:
             echo "Found WAR file: $WAR_FILE"
           fi
 
-      # Step 5: Set up SSH connection
+      # Step 6: Set up SSH connection
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ secrets.AWS_SSH_KEY }}
 
-      # Step 6: Deploy WAR file to Tomcat
+      # Step 7: Deploy WAR file to Tomcat
       - name: Deploy WAR to Tomcat
         run: |
           echo "Deploying WAR file: $WAR_FILE"
